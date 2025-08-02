@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Redirecting...</title>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <script>
+    async function main() {
+      await liff.init({ liffId: "2007866858-vJrKR7yR" }); // ← あなたの LIFF ID
+
+      if (!liff.isLoggedIn()) {
+        liff.login();
+        return;
+      }
+
+      const profile = await liff.getProfile();
+      const userId = profile.userId;
+
+      // ✅ 新しいGAS URLに自動リダイレクト
+      window.location.href = `https://script.google.com/macros/s/AKfycbyn_O7EKyRLF6oJOSJa7rXfbdMBYEsHrSiJOE8imSaaQm5vu0lbqU6U2GogQEBuRPWOzg/exec?userId=${userId}`;
+    }
+
+    main();
+  </script>
+</head>
+<body>
+  Redirecting...
+</body>
+</html>
