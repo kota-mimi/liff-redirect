@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>プロフィールページ</title>
+  <style>
+    body { font-family: sans-serif; background: #f8f9fa; margin: 0; padding: 20px; }
+    .container { max-width: 600px; margin: auto; padding: 20px; background: white; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    h1 { text-align: center; color: #333; }
+    .profile-item { margin-bottom: 15px; }
+    .label { font-weight: bold; color: #555; }s
+    .value { margin-left: 10px; color: #333; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>あなたのプロフィール</h1>
+    <? for (let key in userData) { ?>
+      <div class="profile-item">
+        <span class="label"><?= key ?>:</span>
+        <span class="value"><?= userData[key] ?></span>
+      </div>
+    <? } ?>
+  </div>
+</body>
+</html>ss
