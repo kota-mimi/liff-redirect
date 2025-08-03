@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>LIFF Redirect</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      body {
+        font-family: sans-serif;
+        text-align: center;
+        padding: 30px;
+      }
+      .spinner {
+        margin-top: 30px;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>プロフィールページを準備中です...</h2>
+    <div id="loading-container">
+      <p>しばらくお待ちください。</p>
+      <div class="spinner">⏳</div>
+    </div>
+
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <script>
+      async function main() {
+        try {
+          // ① LIFF ID 初期化（←ここを修正済）
+          await liff.init({
+            liffId: '2007869731',  // 数字だけの正しいLIFF IDを使う
+          });
+        } catch (err) {
+          console.error('LIFF initialization failed:', err);
+          document.querySelector('#loading-container').innerHTML =
+            '<h1>エラー</h1><p>LIFFの初期化に失敗しました。LINEアプリから再度お試しください。</p>';
+          return;
+        }
+
+        if (!liff.isLoggedIn()) {
+          liff.login({ redirectUri: window.location.href });
+          return;
+        }
+
+        try {
+          // ② LINEユーザーのプロフィールを取得
+          const profile = await liff.getProfile();
+          const userId = profile.userId;
+
+          // ③ GASのURLへリダイレクト
+          const gasUrl = `https://script.google.com/macros/s/AKfycbyG2exR1olty52YkGQplgdKUX2fjJ6tAZD9U5UhRZMJJfgioLepWwO8sR19fNSII9UfRQ/exec?userId=${userId}`;
+          window.location.href = gasUrl;
+        } catch (err) {
+          console.error('Failed to get profile or redirect:', err);
+          document.querySelector('#loading-container').innerHTML =
+            '<h1>エラー</h1><p>プロフィールの取得に失敗しました。</p>';
+        }
+      }
+
+      main();
+    </script>
+  </body>
+</html>
