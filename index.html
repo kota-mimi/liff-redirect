@@ -24,7 +24,7 @@
       async function main() {
         try {
           await liff.init({
-            liffId: "2007869731-n8M4KLmk" // ← あなたのLIFF ID（正しい）
+            liffId: "2007869731-n8M4KLmk"
           });
           console.log("✅ LIFF initialized");
         } catch (err) {
@@ -45,8 +45,8 @@
           console.log("✅ Got profile:", profile);
           const userId = profile.userId;
 
-          // 🔽 ここに「新しいGAS URL」を反映済み 🔽
-          const gasUrl = `https://script.google.com/macros/s/AKfycbxDI-csR1IDGa1O2v61LF--XSuclpAGM57LS999X_WWI-qOg4c3BkugBw9mapZFCTulcw/exec?userId=${encodeURIComponent(userId)}`;
+          // ✅ 最新のGAS URLに修正済み
+          const gasUrl = `https://script.google.com/macros/s/AKfycbyzpBuKVy1HNBpv5rLD7yiYBEqo7cbCxstmn8he7K2sQ5jOBe8InWQdHJ3mV1JwIwLt3Q/exec?userId=${encodeURIComponent(userId)}`;
           console.log("➡️ Redirecting to:", gasUrl);
 
           window.location.href = gasUrl;
