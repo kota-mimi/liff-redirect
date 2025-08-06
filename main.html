@@ -2,29 +2,105 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>LIFF Redirect</title>
+    <title>プロフィール</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <style>
       body {
-        font-family: sans-serif;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, sans-serif;
+        background-color: #f0f2f5;
+        margin: 0;
+        padding: 20px;
+        color: #1c1e21;
+      }
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        background-color: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+      }
+      .header {
+        background-color: #1877f2;
+        color: white;
+        padding: 20px;
         text-align: center;
-        padding: 50px;
-        background-color: #f2f2f2;
+      }
+      h1 {
+        margin: 0;
+        font-size: 24px;
+      }
+      .content {
+        padding: 20px;
+      }
+      .item {
+        margin-bottom: 15px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #e9ebee;
+      }
+      .item:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+      }
+      .label {
+        font-weight: bold;
+        color: #606770;
+        margin-bottom: 5px;
+      }
+      .value {
+        font-size: 16px;
+      }
+      .loading, .error {
+        text-align: center;
+        padding: 40px;
       }
     </style>
   </head>
   <body>
-    <div id="loading-container">
-      <h1>プロフィールページを準備中です...</h1>
-      <p>しばらくお待ちください。</p>
+    <div id="profile-container" class="container">
+      <div class="loading">
+        <h1>読み込み中...</h1>
+        <p>プロフィール情報を取得しています。</p>
+      </div>
     </div>
 
     <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <script>
+      // ★ ここに、さっきGASをデプロイしてコピーした新しいURLを貼り付けます
+      const GAS_API_URL = "https://script.google.com/macros/s/AKfycbxnxtYPWucViy4sZcuop9MljH6z7W86B12T_C-fEGEux3jjpSdXjdgWSCNwn0Vr5Yjvvg/exec";
+
+      // ★ ここに、あなたが最後に作った一番新しいLIFF IDを貼り付けます
+      const LIFF_ID = "2007869731-OGxpgeZj";
+
+      const container = document.getElementById("profile-container");
+
+      // エラー表示用の関数
+      function displayError(message) {
+        container.innerHTML = `<div class="error"><h1>エラー</h1><p>${message}</p></div>`;
+      }
+
+      // プロフィール表示用の関数
+      function displayProfile(userData) {
+        let html = '<div class="header"><h1>プロフィール</h1></div><div class="content">';
+        for (const key in userData) {
+          // userIdは表示しない
+          if (key === 'userId') continue;
+
+          html += `
+            <div class="item">
+              <div class="label">${key}</div>
+              <div class="value">${userData[key] || '未設定'}</div>
+            </div>
+          `;
+        }
+        html += '</div>';
+        container.innerHTML = html;
+      }
+
       async function main() {
         try {
-          // ★ LIFF IDは、あなたが最後に作った一番新しいものを設定してください
-          await liff.init({ liffId: "2007869731-OGxpgeZj" });
+          await liff.init({ liffId: LIFF_ID });
 
           if (!liff.isLoggedIn()) {
             liff.login();
@@ -34,19 +110,20 @@
           const profile = await liff.getProfile();
           const userId = profile.userId;
 
-          // ★ GASのURLも、あなたが最後にテストして成功したものを設定してください
-          const gasUrl = `https://script.google.com/macros/s/AKfycbyNdpFFQ31wKEsbQawdYlIgyaYyu6VhDROCqcWWJyE0xXtwlBqPGfmPs1cp06BP5UY8kA/exec`;
-          
-          // ↓↓↓ これが最後の「おまじない」です ↓↓↓
-          const redirectUrl = `${gasUrl}?userId=${encodeURIComponent(userId)}&cacheBuster=${new Date().getTime()}`;
-          
-          // 最終的にリダイレクトを実行
-          window.location.href = redirectUrl;
+          // GASのAPIに電話をかける（fetch）
+          const response = await fetch(`${GAS_API_URL}?userId=${userId}`);
+          const data = await response.json();
 
+          if (data.status === 'success') {
+            // 成功したら、プロフィールを表示
+            displayProfile(data.userData);
+          } else {
+            // GAS側でエラーが起きたら、そのメッセージを表示
+            displayError(data.message);
+          }
         } catch (err) {
-          // もしエラーが起きたら画面に表示する
-          document.querySelector("#loading-container").innerHTML =
-            `<h1>Error</h1><p>処理中にエラーが発生しました: ${err.message}</p>`;
+          // 通信エラーなどが起きたら表示
+          displayError(`処理中にエラーが発生しました: ${err.message}`);
         }
       }
 
