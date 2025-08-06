@@ -2,59 +2,75 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>LIFF Redirect</title>
+    <title>LIFF Error Trap</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <style>
-      body {
-        font-family: sans-serif;
-        text-align: center;
-        padding: 50px;
-        background-color: #f2f2f2;
-      }
+      body { font-family: sans-serif; padding: 15px; word-break: break-all; }
+      .container { border: 2px solid #000; padding: 15px; border-radius: 8px; }
+      .error { border-color: #f00; background-color: #fff0f0; }
+      h1 { font-size: 20px; }
+      p { margin: 10px 0; font-size: 14px; }
+      strong { color: #f00; }
     </style>
   </head>
   <body>
-    <div id="loading-container">
-      <h1>プロフィールページを準備中です...</h1>
-      <p>しばらくお待ちください。</p>
+    <div id="debug-container" class="container">
+      <!-- このバージョン番号が表示されるかどうかが重要 -->
+      <h1>調査バージョン３</h1>
+      <p>LIFFを初期化しています...</p>
     </div>
 
     <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <script>
+      // エラーを画面に表示するための関数
+      function displayError(title, error) {
+        const container = document.getElementById('debug-container');
+        container.classList.add('error');
+        let errorMessage = error.message ? error.message : JSON.stringify(error);
+        container.innerHTML = `
+          <h1>${title}</h1>
+          <p><strong>エラーメッセージ:</strong></p>
+          <p>${errorMessage}</p>
+          <p><strong>エラー詳細:</strong></p>
+          <p>${error.stack ? error.stack : 'N/A'}</p>
+        `;
+      }
+
       async function main() {
         try {
-          await liff.init({
-            liffId: "2007869731-OGxpgeZj"
-          });
-          console.log("✅ LIFF initialized");
-        } catch (err) {
-          console.error("❌ LIFF initialization failed:", err);
-          document.querySelector("#loading-container").innerHTML =
-            "<h1>Error</h1><p>LIFFの初期化に失敗しました。LINEアプリから再度お試しください。</p>";
-          return;
-        }
+          // 1. LIFFの初期化
+          document.getElementById('debug-container').innerHTML += '<p>liff.init() を実行します...</p>';
+          await liff.init({ liffId: "2007869731-OGxpgeZj" });
+          document.getElementById('debug-container').innerHTML += '<p style="color:green;">✅ liff.init() 成功</p>';
 
-        if (!liff.isLoggedIn()) {
-          console.log("ℹ️ Not logged in. Redirecting...");
-          liff.login({ redirectUri: window.location.href });
-          return;
-        }
+          // 2. ログイン状態の確認
+          if (!liff.isLoggedIn()) {
+            document.getElementById('debug-container').innerHTML += '<p>ログインされていません。ログイン画面に移動します。</p>';
+            liff.login();
+            return;
+          }
+          document.getElementById('debug-container').innerHTML += '<p style="color:green;">✅ ログイン済みです</p>';
 
-        try {
+          // 3. プロフィールの取得
+          document.getElementById('debug-container').innerHTML += '<p>liff.getProfile() を実行します...</p>';
           const profile = await liff.getProfile();
-          console.log("✅ Got profile:", profile);
+          document.getElementById('debug-container').innerHTML += '<p style="color:green;">✅ プロフィール取得 成功</p>';
+
+          // 4. 最終結果の表示
           const userId = profile.userId;
+          const gasUrl = `https://script.google.com/macros/s/AKfycbyNdpFFQ31wKEsbQawdYlIgyaYyu6VhDROCqcWWJyE0xXtwlBqPGfmPs1cp06BP5UY8kA/exec`;
+          const redirectUrl = `${gasUrl}?userId=${encodeURIComponent(userId)}`;
 
-          // ✅ 最新のGAS URLに修正済み
-          const gasUrl = `https://script.google.com/macros/s/AKfycbyNdpFFQ31wKEsbQawdYlIgyaYyu6VhDROCqcWWJyE0xXtwlBqPGfmPs1cp06BP5UY8kA/exec?userId=${encodeURIComponent(userId)}`;
+          document.getElementById('debug-container').innerHTML = `
+            <h1>🎉 すべて成功 🎉</h1>
+            <p><strong>取得したユーザーID:</strong><br>${userId}</p>
+            <p><strong>リダイレクト先URL:</strong><br>${redirectUrl}</p>
+            <p>この画面が表示されたということは、すべての処理が正常に完了した証拠です。</p>
+          `;
 
-          console.log("➡️ Redirecting to:", gasUrl);
-
-          window.location.href = gasUrl;
         } catch (err) {
-          console.error("❌ Failed to get profile or redirect:", err);
-          document.querySelector("#loading-container").innerHTML =
-            "<h1>Error</h1><p>プロフィールの取得に失敗しました。</p>";
+          // ★★★どんなエラーでもここで捕まえる★★★
+          displayError("処理中にエラーが発生しました", err);
         }
       }
 
