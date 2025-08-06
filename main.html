@@ -37,7 +37,8 @@
           // ★ GASのURLも、あなたが最後にテストして成功したものを設定してください
           const gasUrl = `https://script.google.com/macros/s/AKfycbyNdpFFQ31wKEsbQawdYlIgyaYyu6VhDROCqcWWJyE0xXtwlBqPGfmPs1cp06BP5UY8kA/exec`;
           
-          const redirectUrl = `${gasUrl}?userId=${encodeURIComponent(userId)}`;
+          // ↓↓↓ これが最後の「おまじない」です ↓↓↓
+          const redirectUrl = `${gasUrl}?userId=${encodeURIComponent(userId)}&cacheBuster=${new Date().getTime()}`;
           
           // 最終的にリダイレクトを実行
           window.location.href = redirectUrl;
