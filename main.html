@@ -2,100 +2,58 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>プロフィール</title>
+    <title>LIFF Final Investigation</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <style>
-      body {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          "Helvetica Neue", Arial, sans-serif;
-        background-color: #f0f2f5;
-        margin: 0;
-        padding: 20px;
-        color: #1c1e21;
-      }
-      .container {
-        max-width: 600px;
-        margin: 0 auto;
-        background-color: #ffffff;
-        border-radius: 12px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        overflow: hidden;
-      }
-      .header {
-        background-color: #1877f2;
-        color: white;
-        padding: 20px;
-        text-align: center;
-      }
-      h1 {
-        margin: 0;
-        font-size: 24px;
-      }
-      .content {
-        padding: 20px;
-      }
-      .item {
-        margin-bottom: 15px;
-        padding-bottom: 15px;
-        border-bottom: 1px solid #e9ebee;
-      }
-      .item:last-child {
-        border-bottom: none;
-        margin-bottom: 0;
-      }
-      .label {
-        font-weight: bold;
-        color: #606770;
-        margin-bottom: 5px;
-      }
-      .value {
-        font-size: 16px;
-      }
-      .loading, .error {
-        text-align: center;
-        padding: 40px;
-      }
+      body { font-family: sans-serif; padding: 15px; word-break: break-all; }
+      .container { border: 2px solid #000; padding: 15px; border-radius: 8px; margin-bottom: 20px;}
+      .error { border-color: #f00; background-color: #fff0f0; }
+      h1 { font-size: 20px; }
+      h2 { font-size: 16px; border-bottom: 1px solid #ccc; padding-bottom: 5px; }
+      p, li { font-size: 14px; }
+      strong { color: #f00; }
+      ul { padding-left: 20px; }
     </style>
   </head>
   <body>
-    <div id="profile-container" class="container">
-      <div class="loading">
-        <h1>読み込み中...</h1>
-        <p>プロフィール情報を取得しています。</p>
-      </div>
+    <div id="debug-container" class="container">
+      <h1>最終調査モード</h1>
+      <p>LIFFを初期化しています...</p>
     </div>
 
     <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <script>
-      // ★ ここに、さっきGASをデプロイしてコピーした新しいURLを貼り付けます
-      const GAS_API_URL = "https://script.google.com/macros/s/AKfycbxnxtYPWucViy4sZcuop9MljH6z7W86B12T_C-fEGEux3jjpSdXjdgWSCNwn0Vr5Yjvvg/exec";
+      // ★ ここに、さっきあなたが教えてくれた新しいGASのURLを入れます
+      const GAS_API_URL = "https://script.google.com/macros/s/AKfycbxpEW9vA8WEvFYevhIA-xK7akHzNgCQ3JRHBAdDh1fX8FtC6RTO5yeVjgaspTFLS5f8uw/exec";
 
-      // ★ ここに、あなたが最後に作った一番新しいLIFF IDを貼り付けます
+      // ★ ここに、あなたが最後に作った一番新しいLIFF IDを入れます
       const LIFF_ID = "2007869731-OGxpgeZj";
 
-      const container = document.getElementById("profile-container");
+      const container = document.getElementById("debug-container");
 
+      // 結果を表示するための関数
+      function displayResult(data) {
+        let listHtml = '<ul>';
+        data.sheet_list.forEach(id => {
+          listHtml += `<li>"${id}" (長さ: ${id.length})</li>`;
+        });
+        listHtml += '</ul>';
+
+        container.innerHTML = `
+          <h1>調査結果</h1>
+          <p>この情報をもとに、原因を特定します。</p>
+          <hr>
+          <h2>スマホからGASが受け取ったID:</h2>
+          <p><strong>"${data.received}" (長さ: ${data.received.length})</strong></p>
+          <hr>
+          <h2>スプレッドシートにあるIDの全リスト:</h2>
+          ${listHtml}
+        `;
+      }
+      
       // エラー表示用の関数
       function displayError(message) {
         container.innerHTML = `<div class="error"><h1>エラー</h1><p>${message}</p></div>`;
-      }
-
-      // プロフィール表示用の関数
-      function displayProfile(userData) {
-        let html = '<div class="header"><h1>プロフィール</h1></div><div class="content">';
-        for (const key in userData) {
-          // userIdは表示しない
-          if (key === 'userId') continue;
-
-          html += `
-            <div class="item">
-              <div class="label">${key}</div>
-              <div class="value">${userData[key] || '未設定'}</div>
-            </div>
-          `;
-        }
-        html += '</div>';
-        container.innerHTML = html;
       }
 
       async function main() {
@@ -110,16 +68,16 @@
           const profile = await liff.getProfile();
           const userId = profile.userId;
 
-          // GASのAPIに電話をかける（fetch）
+          // GASの調査APIにアクセスする
           const response = await fetch(`${GAS_API_URL}?userId=${userId}`);
-          const data = await response.json();
+          const result = await response.json();
 
-          if (data.status === 'success') {
-            // 成功したら、プロフィールを表示
-            displayProfile(data.userData);
+          if (result.status === 'success') {
+            // 成功したら、調査結果を表示
+            displayResult(result.data);
           } else {
-            // GAS側でエラーが起きたら、そのメッセージを表示
-            displayError(data.message);
+            // GAS側でエラーが起きたら表示
+            displayError(result.message);
           }
         } catch (err) {
           // 通信エラーなどが起きたら表示
