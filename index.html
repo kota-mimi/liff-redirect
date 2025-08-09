@@ -1,45 +1,23 @@
-<!doctype html>
-<html lang="ja">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>LIFF Redirect</title>
-  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-</head>
-<body>
-<script>
+<!doctype html><html lang="ja"><head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>LIFF Redirect</title>
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+</head><body><script>
 (async () => {
-  const LIFF_ID = "2007900637-3EJ7L5r4"; // あなたのLIFF ID
-  const GAS_URL = "https://script.google.com/macros/s/AKfycbymzLh7SJhUFhqaq97Xodj1TNnV3orcZSQ-RSbC6uWKRfIAi4EQttQvovGnf9O60LBOaA/exec コレはどこにもはらんでいいの？？新しくデプロイしたやつ"; // あなたのGASのURL
+  const LIFF_ID = "2007900637-3EJ7L5r4"; // ← 最新のLIFF ID
+  const GAS_URL = "https://script.google.com/macros/s/＜あなたの最新exec＞/exec"; // ← 今デプロイしたURL
 
+  const show = (m)=>document.body.innerHTML='<pre style="white-space:pre-wrap;word-break:break-all">'+m+'</pre>';
   try {
-    // LIFF初期化
     await liff.init({ liffId: LIFF_ID });
+    if (!liff.isLoggedIn()) { liff.login(); return; }
     await liff.ready;
 
-    // LINEアプリ内チェック
-    if (!liff.isInClient()) {
-      document.body.innerHTML = "このページはLINEアプリ内で開いてください。";
-      return;
-    }
+    const p = await liff.getProfile();
+    const userId = p?.userId;
+    if (!userId) { show("userIdを取得できませんでした。"); return; }
 
-    // プロフィール取得
-    const profile = await liff.getProfile();
-    const userId = profile.userId;
-
-    if (!userId) {
-      document.body.innerHTML = "ユーザーIDが取得できません。";
-      return;
-    }
-
-    // GASへリダイレクト（キャッシュ回避のため時刻パラメータ付与）
-    location.href = `${GAS_URL}?userId=${encodeURIComponent(userId)}&t=${Date.now()}`;
-
-  } catch (err) {
-    console.error(err);
-    document.body.innerHTML = "LIFF初期化エラー: " + err.message;
-  }
+    location.replace(`${GAS_URL}?userId=${encodeURIComponent(userId)}&page=view&t=${Date.now()}`);
+  } catch(e) { show("LIFF初期化エラー: " + (e?.message||String(e))); }
 })();
-</script>
-</body>
-</html>
+</script></body></html>
