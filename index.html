@@ -10,18 +10,19 @@
 <script>
 (async () => {
   // ===== 設定ここだけ =====
-  const LIFF_ID = "2007900002-JdARGprl"; // ← さっき発行されたLIFF ID
-  const GAS_URL = "YOUR_GAS_EXEC_URL";   // ← あなたのGAS exec URLに差し替え
+  const LIFF_ID = "2007900002-JdARGprl"; // ← あなたのLIFF ID
+  const GAS_URL = "YOUR_GAS_EXEC_URL";   // ← あなたのGAS exec URL
   // ========================
 
-  const goError = (msg) => {
+  const showError = (msg) => {
     document.body.innerHTML =
       '<pre style="white-space:pre-wrap;word-break:break-all;">' + msg + '</pre>';
   };
 
   try {
     await liff.init({ liffId: LIFF_ID });
-    // LINE内で未ログインならログインへ
+
+    // 未ログインの人だけログイン画面へ
     if (!liff.isLoggedIn()) {
       liff.login();
       return;
@@ -29,20 +30,21 @@
 
     await liff.ready;
 
-    // プロフィールから userId を取得（AIコーチのBotと一致するID）
+    // userId取得
     const profile = await liff.getProfile();
     const userId = profile.userId;
 
     if (!userId) {
-      goError("userId を取得できませんでした。Bot連携やチャネル設定を確認してください。");
+      showError("userIdを取得できませんでした。LINEアプリ内でBot連携して開いてください。");
       return;
     }
 
-    // GAS に転送（キャッシュ回避用の t を付与）
-    const url = GAS_URL + "?userId=" + encodeURIComponent(userId) + "&t=" + Date.now();
-    location.replace(url);
+    // GASへ転送（キャッシュ防止用tパラメータ付き）
+    const targetUrl = `${GAS_URL}?userId=${encodeURIComponent(userId)}&t=${Date.now()}`;
+    location.replace(targetUrl);
+
   } catch (e) {
-    goError((e && e.message) ? e.message : String(e));
+    showError((e && e.message) ? e.message : String(e));
   }
 })();
 </script>
