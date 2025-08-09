@@ -9,25 +9,11 @@
 <body>
 <script>
 (async () => {
-  // ===== 設定ここだけ =====
-  const LIFF_ID = "2007900002-JdARGprl"; // ← あなたのLIFF ID
-  const GAS_URL = "YOUR_GAS_EXEC_URL";   // ← あなたのGAS exec URL
-  // ========================
-
-  const showError = (msg) => {
-    document.body.innerHTML =
-      '<pre style="white-space:pre-wrap;word-break:break-all;">' + msg + '</pre>';
-  };
+  const LIFF_ID = "2007900002-JdARGprl"; // あなたのLIFF ID
+  const GAS_URL = "https://script.google.com/macros/s/AKfycbxpEW9vA8WEvFYevhIA-xK7akHzNgCQ3JRHBAdDh1fX8FtC6RTO5yeVjgaspTFLS5f8uw/exec";
 
   try {
     await liff.init({ liffId: LIFF_ID });
-
-    // 未ログインの人だけログイン画面へ
-    if (!liff.isLoggedIn()) {
-      liff.login();
-      return;
-    }
-
     await liff.ready;
 
     // userId取得
@@ -35,16 +21,15 @@
     const userId = profile.userId;
 
     if (!userId) {
-      showError("userIdを取得できませんでした。LINEアプリ内でBot連携して開いてください。");
+      document.body.innerHTML = "userIdが取得できません。LINEアプリ内でBot連携して開いてください。";
       return;
     }
 
-    // GASへ転送（キャッシュ防止用tパラメータ付き）
-    const targetUrl = `${GAS_URL}?userId=${encodeURIComponent(userId)}&t=${Date.now()}`;
-    location.replace(targetUrl);
+    // GASへ転送（キャッシュ回避のためtを付ける）
+    location.replace(`${GAS_URL}?userId=${encodeURIComponent(userId)}&t=${Date.now()}`);
 
   } catch (e) {
-    showError((e && e.message) ? e.message : String(e));
+    document.body.innerHTML = (e && e.message) ? e.message : String(e);
   }
 })();
 </script>
