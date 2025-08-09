@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>LIFF Redirect</title>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+</head>
+<body>
+<script>
+(async () => {
+  // ===== 設定ここだけ =====
+  const LIFF_ID = "2007900002-JdARGprl"; // ← さっき発行されたLIFF ID
+  const GAS_URL = "YOUR_GAS_EXEC_URL";   // ← あなたのGAS exec URLに差し替え
+  // ========================
+
+  const goError = (msg) => {
+    document.body.innerHTML =
+      '<pre style="white-space:pre-wrap;word-break:break-all;">' + msg + '</pre>';
+  };
+
+  try {
+    await liff.init({ liffId: LIFF_ID });
+    // LINE内で未ログインならログインへ
+    if (!liff.isLoggedIn()) {
+      liff.login();
+      return;
+    }
+
+    await liff.ready;
+
+    // プロフィールから userId を取得（AIコーチのBotと一致するID）
+    const profile = await liff.getProfile();
+    const userId = profile.userId;
+
+    if (!userId) {
+      goError("userId を取得できませんでした。Bot連携やチャネル設定を確認してください。");
+      return;
+    }
+
+    // GAS に転送（キャッシュ回避用の t を付与）
+    const url = GAS_URL + "?userId=" + encodeURIComponent(userId) + "&t=" + Date.now();
+    location.replace(url);
+  } catch (e) {
+    goError((e && e.message) ? e.message : String(e));
+  }
+})();
+</script>
+</body>
+</html>
