@@ -6,36 +6,42 @@
   <title>LIFF Redirect</title>
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <style>
-    body { font-family: sans-serif; text-align: center; padding-top: 50px; }
-    pre { white-space: pre-wrap; word-break: break-all; text-align: left; max-width: 90%; margin: auto; }
+    body { font-family: sans-serif; text-align: center; padding: 32px 16px; }
+    pre { white-space: pre-wrap; word-break: break-all; text-align: left; max-width: 90%; margin: 16px auto; }
   </style>
 </head>
 <body>
   <p>情報を読み込んでいます...</p>
   <script>
     (async () => {
-      const LIFF_ID = "2007900637-3EJ7L5r4"; 
-      const GAS_URL = "https://script.google.com/macros/s/AKfycbwhDZ7e4o6V3VyfrYe3KXoKKNj_VVLSjfSSFog9vflNrY74G2Cgnh7wcanhRgTGhq0wQQ/exec";
+      const LIFF_ID = "2007900637-3EJ7L5r4";
+      const GAS_EXEC = "https://script.google.com/macros/s/AKfycbwhDZ7e4o6V3VyfrYe3KXoKKNj_VVLSjfSSFog9vflNrY74G2Cgnh7wcanhRgTGhq0wQQ/exec";
 
       const show = (m) => document.body.innerHTML = '<pre>' + m + '</pre>';
 
       try {
         await liff.init({ liffId: LIFF_ID });
-        if (!liff.isLoggedIn()) {
-          liff.login();
-          return;
-        }
+        if (!liff.isLoggedIn()) { liff.login(); return; }
         await liff.ready;
 
         const profile = await liff.getProfile();
-        const userId = profile?.userId;
-        if (!userId) {
-          show("ユーザーIDを取得できませんでした。");
-          return;
-        }
+        const userId = profile && profile.userId;
+        if (!userId) { show("ユーザーIDを取得できませんでした。"); return; }
 
-        // 以前の動いてたやつに合わせて embedded=true を追加
-        location.replace(`${GAS_URL}?userId=${encodeURIComponent(userId)}&page=view&embedded=true`);
+        // embedded=true を付けない版（ブルーバーは出る想定）
+        const target = `${GAS_EXEC}?userId=${encodeURIComponent(userId)}&page=view&t=${Date.now()}`;
+
+        // まずアプリ内で遷移を試す。遅い環境向けに外部フォールバックも一応残す
+        let opened = false;
+        const timer = setTimeout(() => {
+          if (opened) return;
+          try { liff.openWindow({ url: target, external: true }); } catch (e) { show("外部ブラウザ起動に失敗: " + (e?.message || String(e))); }
+        }, 1500);
+
+        location.replace(target);
+        opened = true;
+        clearTimeout(timer);
+
       } catch (e) {
         show("LIFF処理中にエラーが発生しました:\n" + (e?.message || String(e)));
       }
