@@ -6,7 +6,6 @@
   <title>LIFF Redirect</title>
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <style>
-    /* 読み込み中にメッセージを表示するためのスタイル */
     body { font-family: sans-serif; text-align: center; padding-top: 50px; }
     pre { white-space: pre-wrap; word-break: break-all; text-align: left; max-width: 90%; margin: auto; }
   </style>
@@ -15,43 +14,29 @@
   <p>情報を読み込んでいます...</p>
   <script>
     (async () => {
-      // あなたの新しいLIFF ID
       const LIFF_ID = "2007900637-3EJ7L5r4"; 
-      
-      // ★★★ あなたが教えてくれたURLを、正しくここに入れました ★★★
       const GAS_URL = "https://script.google.com/macros/s/AKfycbx_anOWS1NEVu1e6nkLB1B8uaxYnW5WgHM1Xzt9iJYQBIgeBBUAcK1xVASB_Pcy1e5PGg/exec";
 
-      // エラーなどを画面に表示するための簡単な関数
       const show = (m) => document.body.innerHTML = '<pre>' + m + '</pre>';
 
       try {
-        // LIFFを初期化
         await liff.init({ liffId: LIFF_ID });
-
-        // ログインしていなければ、ログインを促す
         if (!liff.isLoggedIn()) {
           liff.login();
           return;
         }
-
-        // LIFF SDKの準備が完了するのを待つ
         await liff.ready;
 
-        // プロフィール情報を取得
         const profile = await liff.getProfile();
         const userId = profile?.userId;
-
-        // userIdが取得できなかった場合のエラー処理
         if (!userId) {
           show("ユーザーIDを取得できませんでした。");
           return;
         }
 
-        // GASのURLにリダイレクト（キャッシュ対策のタイムスタンプ付き）
-        location.replace(`${GAS_URL}?userId=${encodeURIComponent(userId)}&page=view&t=${Date.now()}`);
-
+        // 以前の動いてたやつに合わせて embedded=true を追加
+        location.replace(`${GAS_URL}?userId=${encodeURIComponent(userId)}&page=view&embedded=true`);
       } catch (e) {
-        // 何かエラーが起きたら、その内容を画面に表示
         show("LIFF処理中にエラーが発生しました:\n" + (e?.message || String(e)));
       }
     })();
