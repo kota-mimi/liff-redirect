@@ -3,49 +3,141 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>LIFF Redirect</title>
+  <title>マイページ</title>
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <style>
-    body { font-family: sans-serif; text-align: center; padding: 32px 16px; }
-    pre { white-space: pre-wrap; word-break: break-all; text-align: left; max-width: 90%; margin: 16px auto; }
+    :root{
+      --brand:#1086ff; /* 青 */
+      --ink:#111; --muted:#6b7280; --line:#e5e7eb; --bg:#fff;
+    }
+    *{box-sizing:border-box} body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans",Meiryo,sans-serif;background:var(--bg);color:var(--ink)}
+    /* ヘッダー */
+    .header{position:sticky;top:0;z-index:20;background:#fff;border-bottom:1px solid var(--line)}
+    .header-inner{display:flex;align-items:center;justify-content:space-between;max-width:560px;margin:0 auto;padding:12px 16px}
+    .appname{font-size:18px;font-weight:700}
+    .brand{display:block;margin:12px auto 4px;width:110px;opacity:.9}
+    .subtitle{color:var(--muted);font-size:13px;text-align:center;margin-bottom:12px}
+    .menu-btn{width:36px;height:36px;border-radius:10px;border:1px solid var(--line);display:grid;place-items:center;cursor:pointer;background:#fff}
+    .menu-btn span{display:block;width:18px;height:2px;background:#333;position:relative}
+    .menu-btn span::before,.menu-btn span::after{content:"";position:absolute;left:0;width:18px;height:2px;background:#333}
+    .menu-btn span::before{top:-6px}.menu-btn span::after{top:6px}
+
+    /* タイル */
+    .wrap{max-width:560px;margin:0 auto;padding:12px 16px 24px}
+    .section-title{font-size:18px;font-weight:700;color:#2480e6;margin:8px 0 12px;padding-top:6px;border-top:1px solid var(--line)}
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+    .tile{border:1px solid var(--line);border-radius:14px;padding:14px 8px;text-align:center;cursor:pointer;transition:transform .06s}
+    .tile:active{transform:scale(.98)}
+    .tile-icon{font-size:28px;line-height:1.1}
+    .tile-label{margin-top:8px;font-size:13px;color:#2c6da8}
+
+    /* 横長ボタン */
+    .wide{margin-top:18px;border:1px solid var(--line);border-radius:12px;padding:14px 12px;display:flex;gap:12px;align-items:center;cursor:pointer}
+    .wide .ico{font-size:22px}
+    .wide .txt{color:#2c6da8;font-weight:600}
+
+    /* ドロワーメニュー */
+    .drawer{position:fixed;inset:0;z-index:40;display:none}
+    .drawer.active{display:block}
+    .scrim{position:absolute;inset:0;background:rgba(0,0,0,.3)}
+    .panel{position:absolute;top:0;right:0;width:78%;max-width:360px;height:100%;background:#fff;border-left:1px solid var(--line);display:flex;flex-direction:column}
+    .panel h3{margin:14px 16px;font-size:16px;color:#2480e6}
+    .list{padding:8px 0}
+    .item{display:flex;align-items:center;gap:10px;padding:14px 16px;border-top:1px solid var(--line);cursor:pointer}
+    .item:first-child{border-top:none}
+    .item .i{font-size:18px;width:22px;text-align:center}
+    .item .t{font-size:15px}
   </style>
 </head>
 <body>
-  <p>情報を読み込んでいます...</p>
+  <!-- ヘッダー -->
+  <div class="header">
+    <div class="header-inner">
+      <div class="appname">Zoff Membership 風</div>
+      <button id="menuBtn" class="menu-btn" aria-label="メニュー"><span></span></button>
+    </div>
+    <img class="brand" src="https://dummyimage.com/300x80/1086ff/ffffff&text=Your+Logo" alt="Brand" />
+    <div class="subtitle">マイページ</div>
+  </div>
+
+  <!-- コンテンツ -->
+  <div class="wrap">
+    <div class="section-title">クイックメニュー</div>
+    <div class="grid">
+      <div class="tile" data-to="profile"><div class="tile-icon">👤</div><div class="tile-label">プロフィール</div></div>
+      <div class="tile" data-to="counsel"><div class="tile-icon">📝</div><div class="tile-label">カウンセリング</div></div>
+      <div class="tile" data-to="edit"><div class="tile-icon">✏️</div><div class="tile-label">情報編集</div></div>
+      <div class="tile" data-to="weight"><div class="tile-icon">⚖️</div><div class="tile-label">体重グラフ</div></div>
+      <div class="tile" data-to="record"><div class="tile-icon">➕</div><div class="tile-label">体重記録</div></div>
+      <div class="tile" data-to="help"><div class="tile-icon">❓</div><div class="tile-label">ヘルプ</div></div>
+    </div>
+
+    <div class="wide" data-to="orders"><div class="ico">👓</div><div class="txt">ご注文商品一覧</div></div>
+  </div>
+
+  <!-- ドロワー -->
+  <div id="drawer" class="drawer" aria-hidden="true">
+    <div class="scrim"></div>
+    <aside class="panel">
+      <h3>メニュー</h3>
+      <nav class="list">
+        <div class="item" data-to="profile"><div class="i">👤</div><div class="t">会員情報（プロフィール）</div></div>
+        <div class="item" data-to="counsel"><div class="i">📝</div><div class="t">カウンセリング詳細</div></div>
+        <div class="item" data-to="edit"><div class="i">✏️</div><div class="t">登録情報編集</div></div>
+        <div class="item" data-to="weight"><div class="i">📈</div><div class="t">体重グラフ</div></div>
+        <div class="item" data-to="record"><div class="i">➕</div><div class="t">体重を記録する</div></div>
+        <div class="item" data-to="help"><div class="i">❓</div><div class="t">ヘルプ / お問い合わせ</div></div>
+      </nav>
+    </aside>
+  </div>
+
   <script>
+    // ▼ ここだけ差し替え ▼
+    const LIFF_ID  = "2007900637-3EJ7L5r4"; // 例: 20079...... 既存のを入れてOK
+    const GAS_BASE = "https://script.google.com/macros/s/AKfycbz038EPCxsiOEeHzohcq1lmhAFlcoIgvaIDjQe7LBvGXvZzPi2Jqj1R0lcMWx6AXLcvLg/exec"; // 例: https://script.google.com/macros/s/XXXXX/exec
+    // ▲ ここだけ差し替え ▲
+
+    // ルーティング（既存のGASページはそのまま使用）
+    function routes(userId){
+      return {
+        profile : `${GAS_BASE}?userId=${encodeURIComponent(userId)}&page=view`,
+        counsel : `${GAS_BASE}?userId=${encodeURIComponent(userId)}&page=counseling`,
+        edit    : `${GAS_BASE}?userId=${encodeURIComponent(userId)}&page=edit`,
+        weight  : `${GAS_BASE}?userId=${encodeURIComponent(userId)}&page=weight`,   // 後で作る
+        record  : `${GAS_BASE}?userId=${encodeURIComponent(userId)}&page=weight`,   // 簡易入力用に同じでもOK
+        orders  : `${GAS_BASE}?userId=${encodeURIComponent(userId)}&page=orders`,   // あとで増築
+        help    : `${GAS_BASE}?userId=${encodeURIComponent(userId)}&page=help`      // あとで増築
+      };
+    }
+
+    // LIFF 初期化 → userId取得
+    let USER_ID = null, ROUTE = null;
     (async () => {
-      const LIFF_ID = "2007900637-3EJ7L5r4";
-      const GAS_EXEC = "https://script.google.com/macros/s/AKfycbz038EPCxsiOEeHzohcq1lmhAFlcoIgvaIDjQe7LBvGXvZzPi2Jqj1R0lcMWx6AXLcvLg/exec";
+      await liff.init({ liffId: LIFF_ID });
+      if (!liff.isLoggedIn()) return liff.login();
+      await liff.ready;
+      const profile = await liff.getProfile();
+      USER_ID = profile.userId;
+      ROUTE = routes(USER_ID);
 
-      const show = (m) => document.body.innerHTML = '<pre>' + m + '</pre>';
-
-      try {
-        await liff.init({ liffId: LIFF_ID });
-        if (!liff.isLoggedIn()) { liff.login(); return; }
-        await liff.ready;
-
-        const profile = await liff.getProfile();
-        const userId = profile && profile.userId;
-        if (!userId) { show("ユーザーIDを取得できませんでした。"); return; }
-
-        // embedded=true を付けない版（ブルーバーは出る想定）
-        const target = `${GAS_EXEC}?userId=${encodeURIComponent(userId)}&page=view&t=${Date.now()}`;
-
-        // まずアプリ内で遷移を試す。遅い環境向けに外部フォールバックも一応残す
-        let opened = false;
-        const timer = setTimeout(() => {
-          if (opened) return;
-          try { liff.openWindow({ url: target, external: true }); } catch (e) { show("外部ブラウザ起動に失敗: " + (e?.message || String(e))); }
-        }, 1500);
-
-        location.replace(target);
-        opened = true;
-        clearTimeout(timer);
-
-      } catch (e) {
-        show("LIFF処理中にエラーが発生しました:\n" + (e?.message || String(e)));
-      }
+      // クリック配線
+      document.querySelectorAll('[data-to]').forEach(el=>{
+        el.addEventListener('click', ()=> go(el.dataset.to));
+      });
     })();
+
+    function go(key){
+      if(!ROUTE) return;
+      location.href = ROUTE[key]; // 同じLIFF内でそのまま遷移（既存GASを開く）
+    }
+
+    // ドロワー制御
+    const drawer = document.getElementById('drawer');
+    const btn = document.getElementById('menuBtn');
+    btn.addEventListener('click', ()=> drawer.classList.add('active'));
+    drawer.addEventListener('click', e=>{
+      if(e.target.classList.contains('scrim')) drawer.classList.remove('active');
+    });
   </script>
 </body>
 </html>
